@@ -1,0 +1,1188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mobile Activity Tracker</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 100%;
+      margin: 0 auto;
+      padding: 10px;
+      line-height: 1.6;
+      font-size: 16px;
+    }
+    h1, h2, h3 {
+      color: #333;
+    }
+    .section {
+      margin-bottom: 15px;
+      border: 1px solid #ddd;
+      padding: 10px;
+      border-radius: 5px;
+    }
+    .field {
+      margin-bottom: 10px;
+    }
+    label {
+      display: block;
+      margin-bottom: 3px;
+      font-weight: bold;
+    }
+    input, textarea, select {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      box-sizing: border-box;
+      font-size: 16px;
+    }
+    .time-input {
+      width: 48%;
+      display: inline-block;
+    }
+    .time-separator {
+      display: inline-block;
+      width: 2%;
+      text-align: center;
+    }
+    button {
+      background-color: #4CAF50;
+      color: white;
+      padding: 10px 15px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 16px;
+      margin-right: 5px;
+      margin-bottom: 5px;
+    }
+    button:hover {
+      background-color: #45a049;
+    }
+    .remove-btn {
+      background-color: #f44336;
+      padding: 5px 10px;
+      font-size: 14px;
+    }
+    .activity {
+      border: 1px solid #ddd;
+      padding: 10px;
+      margin-bottom: 10px;
+      border-radius: 5px;
+    }
+    .tab-container {
+      margin-bottom: 15px;
+    }
+    .tab-buttons {
+      display: flex;
+      overflow-x: auto;
+      border-bottom: 1px solid #ccc;
+      white-space: nowrap;
+    }
+    .tab-button {
+      background-color: #f1f1f1;
+      border: none;
+      padding: 8px 12px;
+      cursor: pointer;
+      color: #333;
+      margin-right: 2px;
+      font-size: 14px;
+    }
+    .tab-button:hover {
+      background-color: #ddd;
+    }
+    .tab-button.active {
+      background-color: #4CAF50;
+      color: white;
+    }
+    .tab-content {
+      display: none;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-top: none;
+    }
+    .tab-content.active {
+      display: block;
+    }
+    .quick-buttons {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+      gap: 4px;
+    }
+    .quick-btn {
+      background-color: #2196F3;
+      padding: 5px;
+      font-size: 12px;
+    }
+    .mood-selector {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+    .mood-option {
+      text-align: center;
+      cursor: pointer;
+    }
+    .mood-emoji {
+      font-size: 22px;
+      display: block;
+      margin-bottom: 3px;
+    }
+    .selected-mood {
+      border: 2px solid #4CAF50;
+      border-radius: 5px;
+      padding: 3px;
+    }
+    .storage-info {
+      margin-top: 10px;
+      font-size: 12px;
+      color: #666;
+    }
+    #data-manager {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background-color: #f9f9f9;
+      border-top: 1px solid #ddd;
+      padding: 10px;
+      display: flex;
+      justify-content: space-around;
+      z-index: 100;
+    }
+    #data-manager button {
+      flex: 1;
+      margin: 0 3px;
+      padding: 8px 5px;
+      font-size: 14px;
+    }
+    .entry-list {
+      max-height: 300px;
+      overflow-y: auto;
+      border: 1px solid #ddd;
+      padding: 8px;
+      margin-bottom: 10px;
+    }
+    .entry-item {
+      padding: 5px;
+      border-bottom: 1px solid #eee;
+      display: flex;
+      justify-content: space-between;
+    }
+    .entry-item button {
+      padding: 3px 8px;
+      font-size: 12px;
+    }
+    .category-heading {
+      font-weight: bold;
+      margin: 4px 0;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <h1 style="text-align: center; margin-bottom: 15px;">Daily Activity Tracker</h1>
+  
+  <div class="section">
+    <div class="field">
+      <label for="date">Date:</label>
+      <input type="date" id="date">
+    </div>
+  </div>
+
+  <div class="tab-container">
+    <div class="tab-buttons">
+      <button class="tab-button active" onclick="openTab('quick-tab')">Quick Add</button>
+      <button class="tab-button" onclick="openTab('activity-tab')">Activities</button>
+      <button class="tab-button" onclick="openTab('water-tab')">Water & Food</button>
+      <button class="tab-button" onclick="openTab('notes-tab')">Notes</button>
+      <button class="tab-button" onclick="openTab('history-tab')">History</button>
+    </div>
+    
+    <div id="quick-tab" class="tab-content active">
+      <div>
+        <p class="category-heading">Morning</p>
+        <div class="quick-buttons">
+          <button class="quick-btn" onclick="quickAddActivity('Wakeup')">Wakeup</button>
+          <button class="quick-btn" onclick="quickAddActivity('Clean face')">Clean face</button>
+          <button class="quick-btn" onclick="quickAddActivity('Breakfast')">Breakfast</button>
+          <button class="quick-btn" onclick="quickAddActivity('Prepare food')">Prep food</button>
+        </div>
+        
+        <p class="category-heading">Work & Study</p>
+        <div class="quick-buttons">
+          <button class="quick-btn" onclick="quickAddActivity('Work')">Work</button>
+          <button class="quick-btn" onclick="quickAddActivity('Study')">Study</button>
+          <button class="quick-btn" onclick="quickAddActivity('Break')">Break</button>
+          <button class="quick-btn" onclick="quickAddActivity('居眠り')">居眠り</button>
+        </div>
+        
+        <p class="category-heading">Meals</p>
+        <div class="quick-buttons">
+          <button class="quick-btn" onclick="quickAddActivity('Breakfast')">Breakfast</button>
+          <button class="quick-btn" onclick="quickAddActivity('Lunch')">Lunch</button>
+          <button class="quick-btn" onclick="quickAddActivity('Dinner')">Dinner</button>
+          <button class="quick-btn" onclick="quickAddActivity('Snack')">Snack</button>
+        </div>
+        
+        <p class="category-heading">Entertainment</p>
+        <div class="quick-buttons">
+          <button class="quick-btn" onclick="quickAddActivity('Facebook')">Facebook</button>
+          <button class="quick-btn" onclick="quickAddActivity('Phone')">Phone</button>
+          <button class="quick-btn" onclick="quickAddActivity('Anime')">Anime</button>
+          <button class="quick-btn" onclick="quickAddActivity('Netflix')">Netflix</button>
+          <button class="quick-btn" onclick="quickAddActivity('Music')">Music</button>
+        </div>
+        
+        <p class="category-heading">Health & Rest</p>
+        <div class="quick-buttons">
+          <button class="quick-btn" onclick="quickAddActivity('Rest')">Rest</button>
+          <button class="quick-btn" onclick="quickAddActivity('Sleep')">Sleep</button>
+          <button class="quick-btn" onclick="quickAddActivity('Exercise')">Exercise</button>
+          <button class="quick-btn" onclick="quickAddActivity('Cleaning')">Cleaning</button>
+        </div>
+        
+        <p class="category-heading">Going Places</p>
+        <div class="quick-buttons">
+          <button class="quick-btn" onclick="quickAddActivity('Go out')">Go out</button>
+          <button class="quick-btn" onclick="quickAddActivity('Gotanno')">Gotanno</button>
+          <button class="quick-btn" onclick="quickAddActivity('Shopping')">Shopping</button>
+          <button class="quick-btn" onclick="quickAddActivity('Commute')">Commute</button>
+        </div>
+      </div>
+    </div>
+    
+    <div id="activity-tab" class="tab-content">
+      <div id="activities-container">
+        <!-- Activities will be added here -->
+      </div>
+      <button type="button" id="add-activity-btn" style="margin-top: 10px;">+ Add Activity</button>
+    </div>
+    
+    <div id="water-tab" class="tab-content">
+      <div style="margin-bottom: 15px;">
+        <h3 style="margin-top: 0;">Quick Add Consumption</h3>
+        
+        <div style="display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 10px;">
+          <button style="flex-grow: 1;" onclick="addQuickConsumption('Water', 600)">Water 600ml</button>
+          <button style="flex-grow: 1;" onclick="addQuickConsumption('Water', 300)">Water 300ml</button>
+          <button style="flex-grow: 1;" onclick="addQuickConsumption('Milk', 200)">Milk 200ml</button>
+        </div>
+        
+        <div style="display: flex; flex-wrap: wrap; gap: 5px;">
+          <button style="flex-grow: 1;" onclick="addQuickConsumption('Snack', 'Ice cream', 80)">Ice cream</button>
+          <button style="flex-grow: 1;" onclick="addQuickConsumption('Coffee')">Coffee</button>
+          <button style="flex-grow: 1;" onclick="addQuickConsumption('Tea')">Tea</button>
+        </div>
+      </div>
+      
+      <div style="margin-bottom: 15px;">
+        <h3 style="margin-top: 0;">Custom Entry</h3>
+        
+        <div class="field">
+          <label for="consumption-type">Type:</label>
+          <select id="consumption-type">
+            <option value="Water">Water</option>
+            <option value="Milk">Milk</option>
+            <option value="Coffee">Coffee</option>
+            <option value="Tea">Tea</option>
+            <option value="Snack">Snack</option>
+            <option value="Meal">Meal</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+        
+        <div class="field">
+          <label for="consumption-amount">Amount/Description:</label>
+          <input type="text" id="consumption-amount" placeholder="e.g., 600ml, 2 cookies">
+        </div>
+        
+        <div class="field">
+          <label for="consumption-calories">Calories (if applicable):</label>
+          <input type="number" id="consumption-calories" placeholder="kcal">
+        </div>
+        
+        <button type="button" onclick="addCustomConsumption()">Add Consumption</button>
+      </div>
+    </div>
+    
+    <div id="notes-tab" class="tab-content">
+      <div class="mood-selector">
+        <div class="mood-option" onclick="selectMood('great')">
+          <span class="mood-emoji">😄</span>
+          <span>Great</span>
+        </div>
+        <div class="mood-option" onclick="selectMood('good')">
+          <span class="mood-emoji">🙂</span>
+          <span>Good</span>
+        </div>
+        <div class="mood-option" onclick="selectMood('neutral')">
+          <span class="mood-emoji">😐</span>
+          <span>Neutral</span>
+        </div>
+        <div class="mood-option" onclick="selectMood('tired')">
+          <span class="mood-emoji">😴</span>
+          <span>Tired</span>
+        </div>
+        <div class="mood-option" onclick="selectMood('bad')">
+          <span class="mood-emoji">😞</span>
+          <span>Bad</span>
+        </div>
+      </div>
+      
+      <div class="field">
+        <label for="notes">Daily Notes:</label>
+        <textarea id="notes" rows="6" placeholder="Any observations or thoughts about your day"></textarea>
+      </div>
+      
+      <button type="button" onclick="saveNotes()">Save Notes</button>
+    </div>
+    
+    <div id="history-tab" class="tab-content">
+      <h3 style="margin-top: 0;">Today's Entries</h3>
+      <div id="today-entries" class="entry-list">
+        <!-- Today's entries will be displayed here -->
+      </div>
+      
+      <h3>Storage Info</h3>
+      <div id="storage-info" class="storage-info">
+        <!-- Storage info will be displayed here -->
+      </div>
+      
+      <div style="margin-top: 15px;">
+        <button type="button" id="export-btn" style="background-color: #2196F3;">Export All Data</button>
+        <button type="button" id="clear-all-btn" style="background-color: #f44336;">Clear All Data</button>
+      </div>
+    </div>
+  </div>
+  
+  <div id="data-manager">
+    <button type="button" id="save-btn">Save Today</button>
+    <button type="button" id="view-btn">View Today</button>
+    <button type="button" id="export-day-btn">Export CSV</button>
+  </div>
+
+  <script>
+    // Global variables
+    let currentMood = '';
+    let activityCounter = 0;
+    
+    // Initialize on page load
+    document.addEventListener('DOMContentLoaded', function() {
+      // Set today's date
+      const today = new Date();
+      const formattedDate = today.toISOString().split('T')[0];
+      document.getElementById('date').value = formattedDate;
+      
+      // Set up buttons
+      document.getElementById('add-activity-btn').onclick = addActivity;
+      document.getElementById('save-btn').onclick = saveToday;
+      document.getElementById('view-btn').onclick = viewToday;
+      document.getElementById('export-day-btn').onclick = exportTodayCSV;
+      document.getElementById('export-btn').onclick = exportAllData;
+      document.getElementById('clear-all-btn').onclick = confirmClearAll;
+      
+      // Load today's data if available
+      loadTodayData();
+      
+      // Update storage info
+      updateStorageInfo();
+    });
+    
+    // Tab functionality
+    function openTab(tabId) {
+      // Hide all tabs
+      document.querySelectorAll('.tab-content').forEach(tab => {
+        tab.classList.remove('active');
+      });
+      
+      // Remove active class from all buttons
+      document.querySelectorAll('.tab-button').forEach(button => {
+        button.classList.remove('active');
+      });
+      
+      // Show the selected tab
+      document.getElementById(tabId).classList.add('active');
+      
+      // Add active class to clicked button
+      const buttons = document.querySelectorAll('.tab-button');
+      for (let i = 0; i < buttons.length; i++) {
+        if (buttons[i].getAttribute('onclick') === `openTab('${tabId}')`) {
+          buttons[i].classList.add('active');
+          break;
+        }
+      }
+    }
+    
+    // Function to add a new activity
+    function addActivity() {
+      const container = document.getElementById('activities-container');
+      const activityId = activityCounter++;
+      
+      // Create a new activity element
+      const activity = document.createElement('div');
+      activity.className = 'activity';
+      activity.id = `activity-${activityId}`;
+      
+      // Set the current time
+      const now = new Date();
+      const hours = String(now.getHours()).padStart(2, '0');
+      const minutes = String(now.getMinutes()).padStart(2, '0');
+      const currentTime = `${hours}:${minutes}`;
+      
+      // Populate the activity with fields
+      activity.innerHTML = `
+        <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+          <h3 style="margin: 0; font-size: 16px;">Activity</h3>
+          <button type="button" class="remove-btn" onclick="removeActivity(${activityId})">Remove</button>
+        </div>
+        
+        <div class="field">
+          <label for="activity-type-${activityId}">Type:</label>
+          <select id="activity-type-${activityId}" onchange="toggleCustom(${activityId})">
+            <option value="Work">Work</option>
+            <option value="Study">Study</option>
+            <option value="Exercise">Exercise</option>
+            <option value="Meal">Meal</option>
+            <option value="Break">Break</option>
+            <option value="Reading">Reading</option>
+            <option value="Facebook">Facebook</option>
+            <option value="Netflix">Netflix</option>
+            <option value="Anime">Anime</option>
+            <option value="Entertainment">Entertainment</option>
+            <option value="Rest">Rest</option>
+            <option value="Sleep">Sleep</option>
+            <option value="Personal cleaning">Personal cleaning</option>
+            <option value="Phone usage">Phone usage</option>
+            <option value="custom">Custom...</option>
+          </select>
+          <input type="text" id="custom-activity-${activityId}" style="display: none; margin-top: 8px;" placeholder="Enter custom activity type">
+        </div>
+        
+        <div class="field">
+          <label>Time:</label>
+          <div>
+            <span class="time-input">
+              <input type="time" id="activity-start-${activityId}" value="${currentTime}">
+              <button type="button" style="width: auto; padding: 4px 8px; font-size: 12px;" onclick="setCurrentTime('activity-start-${activityId}')">Now</button>
+            </span>
+            <span class="time-separator">to</span>
+            <span class="time-input">
+              <input type="time" id="activity-end-${activityId}">
+              <button type="button" style="width: auto; padding: 4px 8px; font-size: 12px;" onclick="setCurrentTime('activity-end-${activityId}')">Now</button>
+            </span>
+          </div>
+        </div>
+        
+        <div class="field">
+          <label for="activity-notes-${activityId}">Notes:</label>
+          <textarea id="activity-notes-${activityId}" rows="2" placeholder="Additional notes or details"></textarea>
+        </div>
+      `;
+      
+      // Add the activity to the container
+      container.appendChild(activity);
+    }
+    
+    // Function to add a quick activity
+    function quickAddActivity(type, defaultNote = '') {
+      const container = document.getElementById('activities-container');
+      const activityId = activityCounter++;
+      
+      // Create a new activity element
+      const activity = document.createElement('div');
+      activity.className = 'activity';
+      activity.id = `activity-${activityId}`;
+      
+      // Set the current time
+      const now = new Date();
+      const hours = String(now.getHours()).padStart(2, '0');
+      const minutes = String(now.getMinutes()).padStart(2, '0');
+      const currentTime = `${hours}:${minutes}`;
+      
+      // Populate the activity with fields
+      activity.innerHTML = `
+        <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+          <h3 style="margin: 0; font-size: 16px;">${type}</h3>
+          <button type="button" class="remove-btn" onclick="removeActivity(${activityId})">Remove</button>
+        </div>
+        
+        <div class="field" style="display: none;">
+          <input type="hidden" id="activity-type-${activityId}" value="${type}">
+        </div>
+        
+        <div class="field">
+          <label>Time:</label>
+          <div>
+            <span class="time-input">
+              <input type="time" id="activity-start-${activityId}" value="${currentTime}">
+              <button type="button" style="width: auto; padding: 4px 8px; font-size: 12px;" onclick="setCurrentTime('activity-start-${activityId}')">Now</button>
+            </span>
+            <span class="time-separator">to</span>
+            <span class="time-input">
+              <input type="time" id="activity-end-${activityId}">
+              <button type="button" style="width: auto; padding: 4px 8px; font-size: 12px;" onclick="setCurrentTime('activity-end-${activityId}')">Now</button>
+            </span>
+          </div>
+        </div>
+        
+        <div class="field">
+          <label for="activity-notes-${activityId}">Notes:</label>
+          <textarea id="activity-notes-${activityId}" rows="2" placeholder="Additional notes or details">${defaultNote}</textarea>
+        </div>
+      `;
+      
+      // Add the activity to the container
+      container.appendChild(activity);
+      
+      // Switch to the activity tab
+      openTab('activity-tab');
+      
+      // Show status message
+      showMessage(`Added '${type}' activity`);
+    }
+    
+    // Function to remove an activity
+    function removeActivity(id) {
+      const activity = document.getElementById(`activity-${id}`);
+      if (activity) {
+        activity.remove();
+      }
+    }
+    
+    // Function to toggle custom activity type
+    function toggleCustom(id) {
+      const select = document.getElementById(`activity-type-${id}`);
+      const custom = document.getElementById(`custom-activity-${id}`);
+      
+      if (select.value === 'custom') {
+        custom.style.display = 'block';
+      } else {
+        custom.style.display = 'none';
+      }
+    }
+    
+    // Function to set current time in time fields
+    function setCurrentTime(elementId) {
+      const now = new Date();
+      const hours = String(now.getHours()).padStart(2, '0');
+      const minutes = String(now.getMinutes()).padStart(2, '0');
+      const currentTime = `${hours}:${minutes}`;
+      
+      document.getElementById(elementId).value = currentTime;
+    }
+    
+    // Function to add quick consumption
+    function addQuickConsumption(type, amount, calories) {
+      let notes = '';
+      
+      if (type === 'Water' || type === 'Milk') {
+        notes = `${amount}ml`;
+      } else if (type === 'Snack') {
+        notes = `${amount} (${calories}kcal)`;
+      }
+      
+      quickAddActivity(type, notes);
+    }
+    
+    // Function to add custom consumption
+    function addCustomConsumption() {
+      const type = document.getElementById('consumption-type').value;
+      const amount = document.getElementById('consumption-amount').value;
+      const calories = document.getElementById('consumption-calories').value;
+      
+      let notes = amount;
+      if (calories) {
+        notes += ` (${calories}kcal)`;
+      }
+      
+      quickAddActivity(type, notes);
+    }
+    
+    // Selected mood tracking
+    function selectMood(mood) {
+      currentMood = mood;
+      
+      // Remove selected class from all options
+      document.querySelectorAll('.mood-option').forEach(option => {
+        option.classList.remove('selected-mood');
+      });
+      
+      // Add selected class to the chosen mood
+      const moodOptions = document.querySelectorAll('.mood-option');
+      for (let i = 0; i < moodOptions.length; i++) {
+        if (moodOptions[i].querySelector('span:last-child').textContent.toLowerCase() === mood) {
+          moodOptions[i].classList.add('selected-mood');
+          break;
+        }
+      }
+      
+      showMessage(`Mood set to ${mood}`);
+    }
+    
+    function getMoodEmoji(mood) {
+      const emojis = {
+        'great': '😄',
+        'good': '🙂',
+        'neutral': '😐',
+        'tired': '😴',
+        'bad': '😞'
+      };
+      return emojis[mood] || '';
+    }
+    
+    // Function to save notes
+    function saveNotes() {
+      const date = document.getElementById('date').value;
+      const notes = document.getElementById('notes').value;
+      
+      // Create a notes object
+      const notesObj = {
+        date: date,
+        mood: currentMood,
+        text: notes
+      };
+      
+      // Save to local storage
+      localStorage.setItem(`notes_${date}`, JSON.stringify(notesObj));
+      
+      showMessage("Notes saved successfully");
+    }
+    
+    // Function to collect all activity data for today
+    function collectTodayData() {
+      const date = document.getElementById('date').value;
+      
+      // Array to store all activities
+      const activities = [];
+      
+      // Get all activity elements
+      const activityElements = document.querySelectorAll('.activity');
+      activityElements.forEach((activityElem) => {
+        const id = activityElem.id.split('-')[1];
+        
+        // Get activity type
+        let type;
+        const typeElem = document.getElementById(`activity-type-${id}`);
+        if (!typeElem) return;
+        
+        if (typeElem.tagName === 'SELECT') {
+          if (typeElem.value === 'custom') {
+            type = document.getElementById(`custom-activity-${id}`).value || 'Custom Activity';
+          } else {
+            type = typeElem.value;
+          }
+        } else {
+          type = typeElem.value;
+        }
+        
+        // Get times and notes
+        const startTime = document.getElementById(`activity-start-${id}`).value;
+        const endTime = document.getElementById(`activity-end-${id}`).value;
+        const notes = document.getElementById(`activity-notes-${id}`).value;
+        
+        // Add to activities array
+        activities.push({
+          type: type,
+          startTime: startTime,
+          endTime: endTime,
+          notes: notes
+        });
+      });
+      
+      // Get notes
+      const notesObj = JSON.parse(localStorage.getItem(`notes_${date}`) || '{"text":"","mood":""}');
+      
+      // Create the final data object
+      const data = {
+        date: date,
+        activities: activities,
+        notes: notesObj.text,
+        mood: notesObj.mood || currentMood
+      };
+      
+      return data;
+    }
+    
+    // Function to save today's data
+    function saveToday() {
+      const data = collectTodayData();
+      
+      // Save to local storage
+      localStorage.setItem(`data_${data.date}`, JSON.stringify(data));
+      
+      // Update storage info
+      updateStorageInfo();
+      
+      // Update today's entries view
+      updateTodayEntries();
+      
+      showMessage("Today's activities saved");
+    }
+    
+    // Function to view today's data
+    function viewToday() {
+      updateTodayEntries();
+      openTab('history-tab');
+    }
+    
+    // Function to update today's entries
+    function updateTodayEntries() {
+      const date = document.getElementById('date').value;
+      const entriesContainer = document.getElementById('today-entries');
+      entriesContainer.innerHTML = '';
+      
+      // Get data for today
+      const dataStr = localStorage.getItem(`data_${date}`);
+      if (!dataStr) {
+        entriesContainer.innerHTML = '<p>No entries found for today.</p>';
+        return;
+      }
+      
+      const data = JSON.parse(dataStr);
+      
+      // Add mood if available
+      if (data.mood) {
+        const moodDiv = document.createElement('div');
+        moodDiv.className = 'entry-item';
+        moodDiv.innerHTML = `<span>Mood: ${data.mood} ${getMoodEmoji(data.mood)}</span>`;
+        entriesContainer.appendChild(moodDiv);
+      }
+      
+      // Add activities
+      if (data.activities && data.activities.length > 0) {
+        const activitiesHeading = document.createElement('p');
+        activitiesHeading.textContent = 'Activities:';
+        activitiesHeading.className = 'category-heading';
+        entriesContainer.appendChild(activitiesHeading);
+        
+        data.activities.forEach((activity, index) => {
+          const activityDiv = document.createElement('div');
+          activityDiv.className = 'entry-item';
+          
+          let timeStr = '';
+          if (activity.startTime) {
+            timeStr += activity.startTime;
+            if (activity.endTime) {
+              timeStr += ` - ${activity.endTime}`;
+            }
+          }
+          
+          let notesStr = activity.notes ? `: ${activity.notes}` : '';
+          
+          activityDiv.innerHTML = `
+            <span>${activity.type} ${timeStr}</span>
+            <small>${notesStr}</small>
+          `;
+          entriesContainer.appendChild(activityDiv);
+        });
+      }
+      
+      // Add notes if available
+      if (data.notes) {
+        const notesHeading = document.createElement('p');
+        notesHeading.textContent = 'Notes:';
+        notesHeading.className = 'category-heading';
+        entriesContainer.appendChild(notesHeading);
+        
+        const notesDiv = document.createElement('div');
+        notesDiv.className = 'entry-item';
+        notesDiv.innerHTML = `<span>${data.notes}</span>`;
+        entriesContainer.appendChild(notesDiv);
+      }
+    }
+    
+    // Function to load today's data if available
+    function loadTodayData() {
+      const date = document.getElementById('date').value;
+      const dataStr = localStorage.getItem(`data_${date}`);
+      
+      if (!dataStr) return;
+      
+      const data = JSON.parse(dataStr);
+      
+      // Clear existing activities
+      document.getElementById('activities-container').innerHTML = '';
+      activityCounter = 0;
+      
+      // Load activities
+      if (data.activities && data.activities.length > 0) {
+        data.activities.forEach(activity => {
+          const container = document.getElementById('activities-container');
+          const activityId = activityCounter++;
+          
+          // Create a new activity element
+          const activityElem = document.createElement('div');
+          activityElem.className = 'activity';
+          activityElem.id = `activity-${activityId}`;
+          
+          // Populate the activity with fields
+          activityElem.innerHTML = `
+            <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+              <h3 style="margin: 0; font-size: 16px;">${activity.type}</h3>
+              <button type="button" class="remove-btn" onclick="removeActivity(${activityId})">Remove</button>
+            </div>
+            
+            <div class="field" style="display: none;">
+              <input type="hidden" id="activity-type-${activityId}" value="${activity.type}">
+            </div>
+            
+            <div class="field">
+              <label>Time:</label>
+              <div>
+                <span class="time-input">
+                  <input type="time" id="activity-start-${activityId}" value="${activity.startTime || ''}">
+                  <button type="button" style="width: auto; padding: 4px 8px; font-size: 12px;" onclick="setCurrentTime('activity-start-${activityId}')">Now</button>
+                </span>
+                <span class="time-separator">to</span>
+                <span class="time-input">
+                  <input type="time" id="activity-end-${activityId}" value="${activity.endTime || ''}">
+                  <button type="button" style="width: auto; padding: 4px 8px; font-size: 12px;" onclick="setCurrentTime('activity-end-${activityId}')">Now</button>
+                </span>
+              </div>
+            </div>
+            
+            <div class="field">
+              <label for="activity-notes-${activityId}">Notes:</label>
+              <textarea id="activity-notes-${activityId}" rows="2" placeholder="Additional notes or details">${activity.notes || ''}</textarea>
+            </div>
+          `;
+          
+          // Add the activity to the container
+          container.appendChild(activityElem);
+        });
+      }
+      
+      // Load mood
+      if (data.mood) {
+        currentMood = data.mood;
+        document.querySelectorAll('.mood-option').forEach(option => {
+          option.classList.remove('selected-mood');
+        });
+        
+        const moodOptions = document.querySelectorAll('.mood-option');
+        for (let i = 0; i < moodOptions.length; i++) {
+          if (moodOptions[i].querySelector('span:last-child').textContent.toLowerCase() === data.mood) {
+            moodOptions[i].classList.add('selected-mood');
+            break;
+          }
+        }
+      }
+      
+      // Load notes
+      if (data.notes) {
+        document.getElementById('notes').value = data.notes;
+      }
+      
+      // Update today's entries
+      updateTodayEntries();
+    }
+    
+    // Function to update storage info
+    function updateStorageInfo() {
+      const storageInfo = document.getElementById('storage-info');
+      
+      // Get all keys in localStorage that start with 'data_'
+      const keys = [];
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && key.startsWith('data_')) {
+          keys.push(key);
+        }
+      }
+      
+      // Sort keys by date (newest first)
+      keys.sort((a, b) => {
+        const dateA = a.replace('data_', '');
+        const dateB = b.replace('data_', '');
+        return dateB.localeCompare(dateA);
+      });
+      
+      // Calculate total storage used
+      let totalSize = 0;
+      keys.forEach(key => {
+        totalSize += localStorage.getItem(key).length;
+      });
+      
+      // Convert to KB
+      const sizeKB = (totalSize / 1024).toFixed(2);
+      
+      // Format the storage info
+      storageInfo.innerHTML = `
+        <p>Days tracked: ${keys.length}</p>
+        <p>Storage used: ${sizeKB} KB</p>
+        <p>Available storage: ~5,000 KB (typical browser limit)</p>
+      `;
+      
+      // List recent days
+      if (keys.length > 0) {
+        let recentDays = '<p>Recent days:</p><ul style="margin-top: 5px;">';
+        
+        // Show up to 5 most recent days
+        const recentKeys = keys.slice(0, 5);
+        recentKeys.forEach(key => {
+          const date = key.replace('data_', '');
+          recentDays += `<li>${date}</li>`;
+        });
+        
+        recentDays += '</ul>';
+        storageInfo.innerHTML += recentDays;
+      }
+    }
+    
+    // Function to export today's data as CSV
+    function exportTodayCSV() {
+      const data = collectTodayData();
+      
+      // Create array for CSV
+      const csvData = [];
+      
+      // Add activities
+      data.activities.forEach(activity => {
+        csvData.push({
+          Date: data.date,
+          Activity: activity.type,
+          Start_Time: activity.startTime,
+          End_Time: activity.endTime,
+          Notes: activity.notes
+        });
+      });
+      
+      // Add mood if available
+      if (data.mood) {
+        csvData.push({
+          Date: data.date,
+          Activity: 'Mood',
+          Start_Time: '',
+          End_Time: '',
+          Notes: `${data.mood} ${getMoodEmoji(data.mood)}`
+        });
+      }
+      
+      // Add notes if available
+      if (data.notes) {
+        csvData.push({
+          Date: data.date,
+          Activity: 'Notes',
+          Start_Time: '',
+          End_Time: '',
+          Notes: data.notes
+        });
+      }
+      
+      // Convert to CSV string
+      const csv = convertToCSV(csvData);
+      
+      // Create download link
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `activities_${data.date}.csv`;
+      link.click();
+      
+      // Clean up
+      setTimeout(() => {
+        URL.revokeObjectURL(url);
+      }, 100);
+      
+      showMessage('CSV exported successfully');
+    }
+    
+    // Function to export all data
+    function exportAllData() {
+      // Get all keys in localStorage that start with 'data_'
+      const keys = [];
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && key.startsWith('data_')) {
+          keys.push(key);
+        }
+      }
+      
+      if (keys.length === 0) {
+        showMessage('No data to export');
+        return;
+      }
+      
+      // Sort keys by date
+      keys.sort();
+      
+      // Create array for CSV
+      const csvData = [];
+      
+      // Process each day's data
+      keys.forEach(key => {
+        const dataStr = localStorage.getItem(key);
+        const data = JSON.parse(dataStr);
+        
+        // Add activities
+        data.activities.forEach(activity => {
+          csvData.push({
+            Date: data.date,
+            Activity: activity.type,
+            Start_Time: activity.startTime,
+            End_Time: activity.endTime,
+            Notes: activity.notes
+          });
+        });
+        
+        // Add mood if available
+        if (data.mood) {
+          csvData.push({
+            Date: data.date,
+            Activity: 'Mood',
+            Start_Time: '',
+            End_Time: '',
+            Notes: `${data.mood} ${getMoodEmoji(data.mood)}`
+          });
+        }
+        
+        // Add notes if available
+        if (data.notes) {
+          csvData.push({
+            Date: data.date,
+            Activity: 'Notes',
+            Start_Time: '',
+            End_Time: '',
+            Notes: data.notes
+          });
+        }
+      });
+      
+      // Convert to CSV string
+      const csv = convertToCSV(csvData);
+      
+      // Create download link
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'all_activities.csv';
+      link.click();
+      
+      // Clean up
+      setTimeout(() => {
+        URL.revokeObjectURL(url);
+      }, 100);
+      
+      showMessage('All data exported successfully');
+    }
+    
+    // Function to confirm clearing all data
+    function confirmClearAll() {
+      if (confirm('Are you sure you want to clear ALL tracked data? This cannot be undone.')) {
+        // Get all keys in localStorage that start with 'data_' or 'notes_'
+        const keysToRemove = [];
+        for (let i = 0; i < localStorage.length; i++) {
+          const key = localStorage.key(i);
+          if (key && (key.startsWith('data_') || key.startsWith('notes_'))) {
+            keysToRemove.push(key);
+          }
+        }
+        
+        // Remove each key
+        keysToRemove.forEach(key => {
+          localStorage.removeItem(key);
+        });
+        
+        // Update storage info
+        updateStorageInfo();
+        
+        // Clear activities container
+        document.getElementById('activities-container').innerHTML = '';
+        document.getElementById('notes').value = '';
+        document.getElementById('today-entries').innerHTML = '<p>No entries found.</p>';
+        
+        showMessage('All data has been cleared');
+      }
+    }
+    
+    // Function to convert data to CSV
+    function convertToCSV(data) {
+      if (data.length === 0) return '';
+      
+      // Get all unique headers
+      const headers = [];
+      data.forEach(item => {
+        Object.keys(item).forEach(key => {
+          if (!headers.includes(key)) {
+            headers.push(key);
+          }
+        });
+      });
+      
+      // Create CSV header row
+      let csv = headers.join(',') + '\n';
+      
+      // Add data rows
+      data.forEach(item => {
+        const row = headers.map(header => {
+          const value = item[header] || '';
+          // Escape commas and quotes
+          if (value.includes(',') || value.includes('"') || value.includes('\n')) {
+            return `"${value.replace(/"/g, '""')}"`;
+          }
+          return value;
+        });
+        
+        csv += row.join(',') + '\n';
+      });
+      
+      return csv;
+    }
+    
+    // Function to show a message
+    function showMessage(message) {
+      // Check if there's an existing message element
+      let messageElem = document.getElementById('status-message');
+      
+      if (!messageElem) {
+        // Create a new message element
+        messageElem = document.createElement('div');
+        messageElem.id = 'status-message';
+        messageElem.style.position = 'fixed';
+        messageElem.style.top = '10px';
+        messageElem.style.left = '50%';
+        messageElem.style.transform = 'translateX(-50%)';
+        messageElem.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+        messageElem.style.color = 'white';
+        messageElem.style.padding = '8px 15px';
+        messageElem.style.borderRadius = '4px';
+        messageElem.style.zIndex = '1000';
+        messageElem.style.fontSize = '14px';
+        messageElem.style.fontWeight = 'bold';
+        
+        document.body.appendChild(messageElem);
+      }
+      
+      // Set the message text
+      messageElem.textContent = message;
+      
+      // Show the message
+      messageElem.style.display = 'block';
+      
+      // Hide the message after 2 seconds
+      setTimeout(() => {
+        messageElem.style.display = 'none';
+      }, 2000);
+    }
+    
+    // Handle date change
+    document.addEventListener('DOMContentLoaded', function() {
+      document.getElementById('date').addEventListener('change', function() {
+        // Ask if user wants to save current data before changing date
+        const confirmed = confirm('Do you want to save the current activities before changing the date?');
+        if (confirmed) {
+          saveToday();
+        }
+        
+        // Load data for the new date
+        loadTodayData();
+      });
+    });
+  </script>
+</body>
+</html>
